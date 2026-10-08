@@ -1,0 +1,32 @@
+{% load static %}
+<div class="event-card" onclick="if(!event.target.closest('button') && !event.target.closest('a')){ window.location.href='{% url 'event_detail' event.pk %}'; }">
+    <div class="event-image">
+        <div class="event-category">{{ event.category }}</div>
+        {% if event.image %}
+            <img src="{{ event.image.url }}" alt="{{ event.title }}">
+        {% else %}
+            <img src="{% static 'images/' %}{{ event.category|lower }}.png" alt="{{ event.title }}">
+        {% endif %}
+    </div>
+    <div class="event-content">
+        <div class="event-date">{{ event.date|date:"M d • h:i A" }}</div>
+        <h3 class="event-title">{{ event.title }}</h3>
+        <div class="event-info">
+            <span>{{ event.location }}</span>
+            <span>{{ event.rsvp_count }} RSVPs</span>
+        </div>
+        {% if show_actions %}
+            <div style="margin-top: 1.5rem; display: flex; gap: 0.8rem; border-top: 1px solid var(--glass-border); padding-top: 1.5rem; flex-wrap: wrap;">
+                <a href="{% url 'edit_event' event.pk %}" class="btn btn-outline" style="font-size: 0.8rem; flex: 1; text-align: center;">Edit</a>
+                <a href="{% url 'view_registrations' event.pk %}" class="btn btn-outline" style="font-size: 0.8rem; flex: 1.2; text-align: center; border-color: #10b981; color: #10b981;">👥 Registrations</a>
+                <form action="{% url 'notify_attendees' event.pk %}" method="POST" style="flex: 1.5;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary" style="width: 100%; font-size: 0.8rem;" {% if event.notified %}disabled{% endif %}>
+                        {% if event.notified %}✓ Sent{% else %}Notify All{% endif %}
+                    </button>
+                </form>
+                <a href="{% url 'delete_event' event.pk %}" class="btn btn-outline" style="font-size: 0.8rem; color: #ef4444; border-color: #ef4444; flex: 1; text-align: center;">Delete</a>
+            </div>
+        {% endif %}
+    </div>
+</div>

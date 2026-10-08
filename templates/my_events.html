@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My RSVPs - CampusEvents{% endblock %}
+
+{% block content %}
+<section class="container animated-fade" style="padding-top: 2rem; padding-bottom: 4rem;">
+    <div style="margin-bottom: 2.5rem; border-bottom: 1.5px solid var(--glass-border); padding-bottom: 1rem;">
+        <h1 style="font-size: 2.2rem; font-weight: 900;">My Registered Events</h1>
+        <p style="color: var(--text-secondary); font-size: 0.95rem;">Review the fests you've RSVPed to and check schedule info.</p>
+    </div>
+
+    <div class="event-grid">
+        {% for rsvp in rsvps %}
+            {% include 'components/event_card.html' with event=rsvp.event %}
+        {% empty %}
+        <div style="grid-column: 1 / -1; text-align: center; padding: 6rem 2rem;">
+            <div style="font-size: 3.5rem; margin-bottom: 1.2rem; opacity: 0.6;">🎟️</div>
+            <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem;">No Registrations Found</h2>
+            <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 2rem;">You haven't RSVPed to any campus events yet. Ready to discover?</p>
+            <a href="/" class="btn btn-primary" style="border-radius: 12px; padding: 0.8rem 2rem;">Discover Live Events</a>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

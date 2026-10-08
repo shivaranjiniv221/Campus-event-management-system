@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Event - CampusEvents{% endblock %}
+
+{% block content %}
+<section class="container" style="padding: 10rem 0; display: flex; justify-content: center;">
+    <div class="delete-card">
+        <div class="warning-icon">⚠️</div>
+        <h1>Are you sure?</h1>
+        <p>You are about to delete <strong>"{{ event.title }}"</strong>. This action cannot be undone and all RSVP data will be lost.</p>
+        
+        <form method="POST">
+            {% csrf_token %}
+            <div class="confirm-actions">
+                <a href="{% url 'organized_events' %}" class="btn btn-outline">No, Keep Event</a>
+                <button type="submit" class="btn btn-primary btn-danger">Yes, Delete Permanently</button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<style>
+    .delete-card {
+        background: var(--surface-color);
+        padding: 4rem;
+        border-radius: 24px;
+        border: 1px solid var(--glass-border);
+        max-width: 500px;
+        text-align: center;
+        box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+    }
+
+    .warning-icon {
+        font-size: 4rem;
+        margin-bottom: 2rem;
+    }
+
+    .delete-card h1 {
+        font-size: 2.2rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .delete-card p {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        line-height: 1.6;
+        margin-bottom: 3rem;
+    }
+
+    .confirm-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .btn-danger {
+        background: var(--accent-color);
+        color: #fff;
+    }
+
+    .btn-danger:hover {
+        box-shadow: 0 0 20px rgba(251, 113, 129, 0.4);
+    }
+</style>
+{% endblock %}

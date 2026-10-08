@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if event %}Edit Event{% else %}Create New Event{% endif %} - CampusEvents{% endblock %}
+
+{% block content %}
+<section class="container" style="padding: 4rem 0;">
+    <div class="form-container">
+        <h1 class="form-title">{% if event %}Edit Event{% else %}Create New Event{% endif %}</h1>
+        <p class="form-subtitle">Fill in the details below to publish your event to the campus community.</p>
+
+        {% if error_message %}
+        <div class="ai-alert" style="background: rgba(251, 113, 129, 0.1); border: 1px solid var(--accent-color); color: var(--accent-color); padding: 1rem; border-radius: 12px; margin-bottom: 2rem; display: flex; align-items: center; gap: 1rem;">
+            <span>🤖 <strong>AI Detection:</strong> {{ error_message }}</span>
+        </div>
+        {% endif %}
+
+        <form method="POST" enctype="multipart/form-data" class="event-form">
+            {% csrf_token %}
+            
+            <div class="form-grid">
+                <div class="form-group full-width">
+                    <label for="title">Event Title</label>
+                    <input type="text" id="title" name="title" value="{{ event.title }}" placeholder="e.g. Annual Tech Symposium" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="category">Category</label>
+                    <select id="category" name="category" required>
+                        <option value="Sports" {% if event.category == 'Sports' %}selected{% endif %}>Sports</option>
+                        <option value="Academic" {% if event.category == 'Academic' %}selected{% endif %}>Academic</option>
+                        <option value="Arts" {% if event.category == 'Arts' %}selected{% endif %}>Arts</option>
+                        <option value="Technology" {% if event.category == 'Technology' %}selected{% endif %}>Technology</option>
+                        <option value="Workshop" {% if event.category == 'Workshop' %}selected{% endif %}>Workshop</option>
+                        <option value="Party" {% if event.category == 'Party' %}selected{% endif %}>Party</option>
+                        <option value="Cultural Fest" {% if event.category == 'Cultural Fest' %}selected{% endif %}>Cultural Fest</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="date">Date & Time</label>
+                    <input type="datetime-local" id="date" name="date" value="{{ event.date|date:'Y-m-d\TH:i' }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="capacity">Seats Capacity</label>
+                    <input type="number" id="capacity" name="capacity" min="1" value="{% if event %}{{ event.capacity }}{% else %}50{% endif %}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="registration_deadline">Registration Deadline</label>
+                    <input type="datetime-local" id="registration_deadline" name="registration_deadline" value="{{ event.registration_deadline|date:'Y-m-d\TH:i' }}">
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="location">Location</label>
+                    <input type="text" id="location" name="location" value="{{ event.location }}" placeholder="e.g. Grand Ballroom, Student Center" required>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="description">About the Event</label>
+                    <textarea id="description" name="description" rows="6" placeholder="Describe what attendees can expect..." required>{{ event.description }}</textarea>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="image">Event Cover Image</label>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="image" name="image" accept="image/*">
+                        <div class="file-dummy">
+                            {% if event.image %}
+                                <span class="success">Current: {{ event.image.name }}</span>
+                            {% else %}
+                                <span>Choose a high-quality image...</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a href="{% url 'organized_events' %}" class="btn btn-outline">Cancel</a>
+                <button type="submit" class="btn btn-primary">{% if event %}Save Changes{% else %}Publish Event{% endif %}</button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<style>
+    .form-container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: var(--surface-color);
+        padding: 4rem;
+        border-radius: 24px;
+        border: 1px solid var(--glass-border);
+        box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+    }
+
+    .form-title {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        text-align: center;
+    }
+
+    .form-subtitle {
+        color: var(--text-secondary);
+        text-align: center;
+        margin-bottom: 4rem;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+    }
+
+    .full-width {
+        grid-column: 1 / -1;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: var(--primary-color);
+    }
+
+    .form-group input, 
+    .form-group select, 
+    .form-group textarea {
+        background: var(--bg-color);
+        border: 1px solid var(--glass-border);
+        padding: 1rem;
+        border-radius: 12px;
+        color: #fff;
+        font-family: inherit;
+        font-size: 1rem;
+        transition: var(--transition);
+    }
+
+    .form-group input:focus, 
+    .form-group select:focus, 
+    .form-group textarea:focus {
+        border-color: var(--primary-color);
+        outline: none;
+        box-shadow: 0 0 15px var(--primary-glow);
+    }
+
+    .file-input-wrapper {
+        position: relative;
+    }
+
+    .file-input-wrapper input {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        opacity: 0;
+        cursor: pointer;
+        z-index: 2;
+    }
+
+    .file-dummy {
+        background: var(--bg-color);
+        border: 2px dashed var(--glass-border);
+        padding: 2rem;
+        border-radius: 12px;
+        text-align: center;
+        color: var(--text-secondary);
+    }
+
+    .form-actions {
+        margin-top: 4rem;
+        display: flex;
+        justify-content: flex-end;
+        gap: 1.5rem;
+        border-top: 1px solid var(--glass-border);
+        padding-top: 2rem;
+    }
+
+    .btn {
+        padding: 1rem 2.5rem;
+    }
+
+    @media (max-width: 600px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+        .form-container {
+            padding: 2rem;
+        }
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Manage Campus Events - Admin Control Hub{% endblock %}
+
+{% block content %}
+<section class="container" style="padding: 4rem 0; min-height: 80vh;">
+    <!-- Header -->
+    <div style="margin-bottom: 3rem; border-bottom: 1px solid var(--glass-border); padding-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h1 style="font-size: 2.2rem; font-weight: 900; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; display: inline-block;">
+                Manage Campus Events
+            </h1>
+            <p style="color: var(--text-secondary); margin-top: 0.5rem; font-size: 0.95rem;">Approve submitted event proposals, reject requests, or remove outdated entries.</p>
+        </div>
+        <a href="{% url 'admin_dashboard' %}" class="btn btn-outline" style="border-radius: 12px;">← Dashboard</a>
+    </div>
+
+    <!-- Event Lists Table -->
+    <div style="background: var(--surface-color); border: 1px solid var(--glass-border); border-radius: 20px; overflow: hidden; box-shadow: 0 15px 35px rgba(0,0,0,0.2);">
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; min-width: 800px;">
+                <thead>
+                    <tr style="background: rgba(255, 255, 255, 0.03); border-bottom: 1px solid var(--glass-border);">
+                        <th style="padding: 1.2rem; font-weight: 700; color: var(--primary-color);">Event Title</th>
+                        <th style="padding: 1.2rem; font-weight: 700; color: var(--primary-color);">Category</th>
+                        <th style="padding: 1.2rem; font-weight: 700; color: var(--primary-color);">Organizer</th>
+                        <th style="padding: 1.2rem; font-weight: 700; color: var(--primary-color);">Location</th>
+                        <th style="padding: 1.2rem; font-weight: 700; color: var(--primary-color);">Date & Time</th>
+                        <th style="padding: 1.2rem; font-weight: 700; color: var(--primary-color);">Status</th>
+                        <th style="padding: 1.2rem; font-weight: 700; color: var(--primary-color); text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for event in events %}
+                    <tr style="border-bottom: 1px solid var(--glass-border); transition: var(--transition); background: transparent;"
+                        onmouseover="this.style.background='rgba(255, 255, 255, 0.015)'"
+                        onmouseout="this.style.background='transparent'">
+                        
+                        <!-- Title -->
+                        <td style="padding: 1.2rem; font-weight: 600; color: var(--text-primary);">
+                            <a href="{% url 'event_detail' event.pk %}" style="color: inherit; text-decoration: none;">{{ event.title }}</a>
+                        </td>
+                        
+                        <!-- Category -->
+                        <td style="padding: 1.2rem;">
+                            <span style="background: rgba(56, 189, 248, 0.1); border: 1px solid var(--primary-glow); padding: 0.25rem 0.6rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; color: var(--primary-color);">
+                                {{ event.category }}
+                            </span>
+                        </td>
+                        
+                        <!-- Organizer -->
+                        <td style="padding: 1.2rem; color: var(--text-secondary); font-size: 0.88rem;">
+                            {{ event.organizer.username|default:"Admin" }}
+                        </td>
+                        
+                        <!-- Location -->
+                        <td style="padding: 1.2rem; color: var(--text-secondary); font-size: 0.88rem;">
+                            {{ event.location }}
+                        </td>
+                        
+                        <!-- Date -->
+                        <td style="padding: 1.2rem; color: var(--text-secondary); font-size: 0.88rem;">
+                            {{ event.date|date:"M d, Y • h:i A" }}
+                        </td>
+                        
+                        <!-- Status Badge -->
+                        <td style="padding: 1.2rem;">
+                            {% if event.status == 'approved' %}
+                                <span style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); color: #10b981; font-size: 0.75rem; font-weight: 700; padding: 0.25rem 0.6rem; border-radius: 20px;">Approved</span>
+                            {% elif event.status == 'pending' %}
+                                <span style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); color: #f59e0b; font-size: 0.75rem; font-weight: 700; padding: 0.25rem 0.6rem; border-radius: 20px; animation: pulseGlow 1.5s infinite;">Pending</span>
+                            {% else %}
+                                <span style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; font-size: 0.75rem; font-weight: 700; padding: 0.25rem 0.6rem; border-radius: 20px;">Rejected</span>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- Actions -->
+                        <td style="padding: 1.2rem; text-align: right;">
+                            <div style="display: flex; gap: 0.5rem; justify-content: flex-end; align-items: center;">
+                                {% if event.status == 'pending' or event.status == 'rejected' %}
+                                    <form action="{% url 'approve_event' event.pk %}" method="POST" style="display: inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-primary" style="padding: 0.3rem 0.8rem; font-size: 0.78rem; border-radius: 8px;">Approve</button>
+                                    </form>
+                                {% endif %}
+                                
+                                {% if event.status == 'pending' or event.status == 'approved' %}
+                                    <form action="{% url 'reject_event' event.pk %}" method="POST" style="display: inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-outline" style="padding: 0.3rem 0.8rem; font-size: 0.78rem; border-radius: 8px; border-color: var(--accent-color); color: var(--accent-color);">Reject</button>
+                                    </form>
+                                {% endif %}
+                                
+                                <a href="{% url 'edit_event' event.pk %}" class="btn btn-outline" style="padding: 0.3rem 0.8rem; font-size: 0.78rem; border-radius: 8px;">Edit</a>
+                                
+                                <form action="{% url 'delete_event' event.pk %}" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this event? This cannot be undone.');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-outline" style="padding: 0.3rem 0.8rem; font-size: 0.78rem; border-radius: 8px; border-color: var(--accent-color); color: var(--accent-color);">✕</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" style="padding: 4rem; text-align: center; color: var(--text-secondary);">
+                            <div style="font-size: 2.5rem; margin-bottom: 1rem;">🔭</div>
+                            No events currently listed in the system database.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<style>
+    @keyframes pulseGlow {
+        0% { opacity: 0.7; }
+        50% { opacity: 1; }
+        100% { opacity: 0.7; }
+    }
+</style>
+{% endblock %}

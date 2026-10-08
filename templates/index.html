@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="hero">
+    <div class="container text-center">
+        <h1 class="gradient-text" style="font-size: 4rem; font-weight: 800; margin-bottom: 1.5rem;">Discover Your <br>Next Experience</h1>
+        <p style="font-size: 1.25rem; color: var(--text-secondary); max-width: 700px; margin: 0 auto 3rem;">From tech workshops to music festivals, find everything that fuels your passion and connects you with the campus community.</p>
+        
+        <form action="{% url 'explore' %}" method="GET" class="search-bar" style="max-width: 600px; margin: 0 auto;">
+            <input type="text" name="search" placeholder="Search for events, clubs, or keywords..." style="border-radius: 100px 0 0 100px;">
+            <button type="submit" class="btn btn-primary" style="padding: 0 2.5rem; border-radius: 0 100px 100px 0;">Search</button>
+        </form>
+    </div>
+</section>
+
+<!-- Categories Section -->
+<section class="container" style="margin-top: 4rem;">
+    <div class="section-title">
+        <h2>Browse by Category</h2>
+    </div>
+    <div class="category-pills" style="display: flex; gap: 1rem; overflow-x: auto; padding-bottom: 1rem;">
+        {% for cat in categories %}
+            <a href="{% url 'explore' %}?category={{ cat }}" class="btn btn-outline" style="border-radius: 100px; white-space: nowrap;">{{ cat }}</a>
+        {% endfor %}
+    </div>
+</section>
+
+{% if recommendations %}
+<section class="container recommendation-banner">
+    <div class="section-title">
+        <h2><span class="ai-badge">AI</span> Recommended For You</h2>
+    </div>
+    <div class="event-grid">
+        {% for event in recommendations %}
+            {% include 'components/event_card.html' with event=event %}
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<section class="container">
+    <div class="section-title">
+        <h2>Trending Now</h2>
+        <p style="color: var(--text-secondary);">The most anticipated events on campus</p>
+    </div>
+    <div class="event-grid">
+        {% for event in trending_events %}
+            {% include 'components/event_card.html' with event=event %}
+        {% endfor %}
+    </div>
+</section>
+
+<section class="container" style="margin-bottom: 8rem;">
+    <div class="section-title">
+        <h2>Upcoming Events</h2>
+        <a href="{% url 'explore' %}" style="color: var(--primary-color);">Explore All &rarr;</a>
+    </div>
+    <div class="event-grid">
+        {% for event in upcoming_events %}
+            {% include 'components/event_card.html' with event=event %}
+        {% empty %}
+        <p>No upcoming events found. Check back later!</p>
+        {% endfor %}
+    </div>
+</section>
+
+<style>
+    .hero {
+        padding: 8rem 0;
+        background: radial-gradient(circle at top right, rgba(56, 189, 248, 0.1), transparent),
+                    radial-gradient(circle at bottom left, rgba(168, 85, 247, 0.05), transparent);
+    }
+    .text-center { text-align: center; }
+    .ai-badge {
+        background: linear-gradient(135deg, var(--primary-color), #818cf8);
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        margin-right: 8px;
+        vertical-align: middle;
+    }
+    .recommendation-banner {
+        background: rgba(56, 189, 248, 0.03);
+        padding: 3rem;
+        border-radius: 32px;
+        border: 1px solid var(--glass-border);
+        margin: 4rem auto;
+    }
+    .category-pills::-webkit-scrollbar { display: none; }
+</style>
+{% endblock %}

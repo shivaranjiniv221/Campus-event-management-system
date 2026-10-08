@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Organize Events - CampusEvents{% endblock %}
+
+{% block content %}
+<div class="organizer-dashboard-wrapper animated-fade">
+    
+    <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; flex-wrap: wrap; gap: 1rem; border-bottom: 1.5px solid var(--glass-border); padding-bottom: 1.5rem;">
+        <div>
+            <h1 class="dashboard-title" style="font-size: 2.2rem; font-weight: 900;">Organizer Hub</h1>
+            <p class="dashboard-subtitle" style="color: var(--text-secondary); font-size: 0.95rem;">Host fests, manage student RSVPs, and broadcast notifications.</p>
+        </div>
+        <a href="{% url 'create_event' %}" class="btn btn-primary" style="border-radius: 12px; font-weight: 700; gap: 0.5rem;">
+            <span>+</span> Create New Event
+        </a>
+    </div>
+
+    <!-- Analytics Panel (Image 3 Analytics block style) -->
+    <div class="analytics-row" style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem; margin-bottom: 3.5rem;">
+        
+        <!-- RSVP Summary Counter -->
+        <div class="stat-summary-card" style="background: var(--surface-color); padding: 2rem; border-radius: var(--card-radius); border: 1.5px solid var(--glass-border); display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.15); relative: overflow;">
+            <div style="font-size: 4rem; font-weight: 900; color: var(--primary-color); line-height: 1;">{{ stats.total_rsvps }}</div>
+            <span style="color: var(--text-secondary); font-size: 0.78rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; margin-top: 0.5rem;">Total RSVP Registrations</span>
+        </div>
+        
+        <!-- RSVP Bar Chart -->
+        <div class="chart-container" style="background: var(--surface-color); padding: 1.5rem; border-radius: var(--card-radius); border: 1.5px solid var(--glass-border); height: 260px; box-shadow: 0 10px 25px rgba(0,0,0,0.15);">
+            <canvas id="rsvpChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Event Lists Grid -->
+    <div>
+        <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--text-primary); margin-bottom: 1.5rem;">My Scheduled Fests & Events</h3>
+        
+        <div class="event-grid">
+            {% for event in events %}
+                {% include 'components/event_card.html' with event=event show_actions=True %}
+            {% empty %}
+                <div class="empty-state" style="grid-column: 1 / -1; text-align: center; padding: 5rem 2rem;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;">📦</div>
+                    <h3 style="font-size: 1.4rem; margin-bottom: 0.5rem;">No Events Scheduled</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">You haven't created any events under this profile yet.</p>
+                    <a href="{% url 'create_event' %}" class="btn btn-primary">Schedule Your First Event</a>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+
+<!-- Chart.js Service script -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Read theme primary color
+        const computedStyle = getComputedStyle(document.body);
+        const primaryColor = computedStyle.getPropertyValue('--primary-color').trim() || '#a855f7';
+        
+        const ctx = document.getElementById('rsvpChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: {{ stats.labels|safe }},
+                datasets: [{
+                    label: 'RSVPs count',
+                    data: {{ stats.data|safe }},
+                    backgroundColor: primaryColor,
+                    borderRadius: 8,
+                    barThickness: 24
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                responsive: true,
+                scales: {
+                    y: { 
+                        beginAtZero: true, 
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' }, 
+                        ticks: { color: '#94a3b8', font: { weight: 'bold' } } 
+                    },
+                    x: { 
+                        grid: { display: false }, 
+                        ticks: { color: '#94a3b8', font: { weight: 'bold' } } 
+                    }
+                },
+                plugins: { 
+                    legend: { display: false } 
+                }
+            }
+        });
+        
+        // Redraw chart when skin/theme is switched in the Hub
+        document.querySelectorAll('[data-skin], [data-layout]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                setTimeout(() => {
+                    const activeStyle = getComputedStyle(document.body);
+                    const newPrimary = activeStyle.getPropertyValue('--primary-color').trim();
+                    Chart.getChart("rsvpChart").data.datasets[0].backgroundColor = newPrimary;
+                    Chart.getChart("rsvpChart").update();
+                }, 100);
+            });
+        });
+    });
+</script>
+
+<style>
+    @media (max-width: 800px) {
+        .analytics-row {
+            grid-template-columns: 1fr !important;
+        }
+    }
+    
+    body.layout-mobile .analytics-row {
+        grid-template-columns: 1fr !important;
+    }
+</style>
+{% endblock %}
